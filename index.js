@@ -20,6 +20,7 @@ const content = {
         q2: "How many hours a week can you dedicate to learning a new digital skill? (e.g., 2-5 hrs, 5-10 hrs)",
         q3: "Are you ready to take action if you find the right roadmap today? (Reply Yes/No)",
         video: "Awesome! Watch the masterclass video here:\nhttps://youtu.be/bJbMN_kHNpI?si=ViVbwz6LgHn6FQfu\n\nAfter you have seen the video, type *Ready* to proceed further.",
+        discount_offer: "Hi! Just a quick update: We are currently running a special discount offer that is valid for the next 6 hours only! ⏳\n\nHave you finished watching the video? Type *Ready* to proceed and claim your discount!",
         q5: "Great! What is the name of the affiliate marketing program mentioned in the video?",
         q6: "Name the 3 courses mentioned in the program (Pro, Premium, Premium Plus).",
         q7: "What are the prices of these 3 courses?",
@@ -36,6 +37,7 @@ const content = {
         q2: "आप हर हफ्ते सीखने के लिए कितना समय दे सकते हैं? (जैसे: 2-5 घंटे, 5-10 घंटे)",
         q3: "अगर आपको सही रोडमैप मिले, तो क्या आप आज ही शुरुआत करने के लिए तैयार हैं? (हाँ / Yes लिखें)",
         video: "शानदार! इस मास्टरक्लास वीडियो को यहाँ देखें:\nhttps://youtu.be/ATATMd5Vx_k?si=ptTCR9HozTOmXS09\n\nवीडियो पूरा देखने के बाद, आगे बढ़ने के लिए *Ready* लिखें।",
+        discount_offer: "नमस्ते! एक खास जानकारी: अभी हमारा एक स्पेशल डिस्काउंट ऑफर चल रहा है जो केवल अगले 6 घंटों के लिए वैध है! ⏳\n\nक्या आपने वीडियो पूरा देख लिया है? आगे बढ़ने और अपना डिस्काउंट पाने के लिए *Ready* लिखें!",
         q5: "बहुत खूब! वीडियो में बताए गए एफिलिएट मार्केटिंग प्रोग्राम का क्या नाम है?",
         q6: "उसमें बताए गए 3 कोर्सेज के नाम क्या हैं? (Pro, Premium, Premium Plus)",
         q7: "इन तीनों कोर्सेज की कीमतें (prices) क्या हैं?",
@@ -52,6 +54,7 @@ const content = {
         q2: "আপনি নতুন ডিজিটাল স্কিল শেখার জন্য সপ্তাহে কত ঘণ্টা সময় দিতে পারবেন? (যেমন: ২-৫ ঘণ্টা)",
         q3: "যদি আপনি সঠিক দিকনির্দেশনা পান, তবে কি আজই শুরু করতে প্রস্তুত? (হ্যাঁ / Yes লিখুন)",
         video: "দারুণ! মাস্টারক্লাস ভিডিওটি এখানে দেখুন:\nhttps://youtu.be/ATATMd5Vx_k?si=ptTCR9HozTOmXS09\n\nভিডিওটি সম্পূর্ণ দেখার পর, এগিয়ে যাওয়ার জন্য *Ready* লিখুন।",
+        discount_offer: "নমস্কার! একটি বিশেষ আপডেট: বর্তমানে আমাদের একটি স্পেশাল ডিসকাউন্ট অফার চলছে যা শুধুমাত্র পরবর্তী ৬ ঘণ্টার জন্য বৈধ! ⏳\n\nআপনি কি ভিডিওটি সম্পূর্ণ দেখেছেন? এগিয়ে যেতে এবং আপনার ডিসকাউন্ট পেতে *Ready* লিখুন!",
         q5: "খুব ভালো! ভিডিওতে বলা অ্যাফিলিয়েট মার্কেটিং প্রোগ্রামটির নাম কী?",
         q6: "সেখানে বলা ৩টি কোর্সের নাম কী? (Pro, Premium, Premium Plus)",
         q7: "এই ৩টি কোর্সের দাম (prices) কত?",
@@ -136,11 +139,32 @@ client.on('message', async (msg) => {
             replyText = content[lang].q3;
             nextStep = 3;
         }
-        // --- STEP 3: Action Readiness ---
+        // --- STEP 3: Action Readiness (Video Sent) ---
         else if (currentStep === 3) {
             saveCol = 8; // Column H
             replyText = content[lang].video;
             nextStep = 4;
+
+            // --- 60-MINUTE URGENCY TIMER ---
+            const targetPhone = msg.from; 
+            const targetLang = lang;
+            
+            setTimeout(async () => {
+                try {
+                    // Check if the user is STILL at step 4 after 60 mins
+                    const checkState = await axios.post(GOOGLE_SHEET_URL, {
+                        action: "GET",
+                        phone: userPhone,
+                        name: userName
+                    });
+                    
+                    if (Number(checkState.data.step) === 4) {
+                        client.sendMessage(targetPhone, content[targetLang].discount_offer);
+                    }
+                } catch (error) {
+                    console.error("Error in 60-min follow up:", error);
+                }
+            }, 60 * 60 * 1000); // 60 minutes in milliseconds
         }
         // --- STEP 4: Video Viewing Check ---
         else if (currentStep === 4) {
