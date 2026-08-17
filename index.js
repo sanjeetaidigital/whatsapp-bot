@@ -4,7 +4,7 @@ const axios = require('axios');
 const express = require('express');
 
 // --- 1. CONFIGURATION ---
-const GOOGLE_SHEET_URL = "YOUR_GOOGLE_WEB_APP_URL_HERE";
+const GOOGLE_SHEET_URL = https://script.google.com/macros/s/AKfycbzNrneKoYnpRRWnftuLYSMmDNuDVbsfY-07Kwz7iIM0hbF8mIX46aoqqiMbvOdXJpxsbg/exec;
 
 // Express server to keep Render awake via cron-job.org
 const app = express();
